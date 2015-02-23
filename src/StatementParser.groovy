@@ -1,34 +1,7 @@
 class StatementParser {
 
-    def methods = [
-            "&": { x1, x2 ->
-                x1 && x2
-            },
-            "|": { x1, x2 ->
-                x1 || x2
-            },
-            "->": { x1, x2 ->
-                !x1 || x2
-            }
-    ]
-
-//    static def inpString = "X1 & (X2 -> X3) & X4"
-
-    static def inpString = "X1 & X2 | X3"
-
-    String solveFunction(String s) {
-        def methodKeys = methods.keySet()
-
-        def anyMethod = "[[${methodKeys.join(']|[')}]]"
-
-        def method = s.find {
-            it in methodKeys
-        } as String
-
-        def args = s.findAll("\\d${anyMethod}\\d")
-        println "Args: ${args}"
-        args[0]
-//        methods[method](args[0].toBoolean(), args[1].toBoolean()) ? "1" : "0"
+    def solveFunction(String s) {
+        Eval.me(s)
     }
 
     def generateInputs(int inputs) {
@@ -48,39 +21,26 @@ class StatementParser {
         inputList
     }
 
-    def parse(String s) {
-        s = s.replaceAll " ", ""
+    def generateTable(String statement) {
+        statement = statement.replaceAll " ", ""
 
-        println s
-
-        def inputNames = s.findAll("X\\d+") as Set
+        def inputNames = statement.findAll("X\\d+") as Set
         def inputsSize = inputNames.size()
 
-        println inputsSize
-
         def inputs = generateInputs(inputsSize)
-        println inputs
+
+        def outputs = []
+
         inputs.each { inp ->
-            String y = new String(s)
+            String y = new String(statement)
             inputNames.eachWithIndex { inpName, j ->
-                y = y.replaceAll(inpName, "${inp[j]}")
+                y = y.replaceAll(inpName, "${inp[j] as boolean}")
             }
-            println y
-            println solveFunction(y)
+
+            outputs << inp.clone() + (solveFunction(y)? 1 : 0)
         }
 
-        def arrSize = inputsSize + 1
-
-//        methods.each {
-//            println it("0", "0")
-//        }
-
-    }
-
-    static void main(String... args) {
-        def parser = new StatementParser()
-        parser.parse(inpString)
-
+        outputs
     }
 
 }
