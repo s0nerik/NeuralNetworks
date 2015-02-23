@@ -3,7 +3,8 @@ import groovy.json.JsonSlurper
 class Perceptron {
 
 //    def patterns = new JsonSlurper().parse(new File("input.json")).patterns
-    def patterns = new StatementParser().generateTable(new File('input.txt').getText())
+    def statement = new File('input.txt').readLines().find {!it.startsWith("#")}
+    def patterns = new StatementParser().generateTable(statement)
 
     def studySpeed = 0.115
     def enters = (0..<(patterns[0].size() - 1)).collect { 0.0 }
@@ -50,7 +51,7 @@ class Perceptron {
 
         println "Epochs passed: ${epochsPassed}"
         println "Weights: ${weights}"
-        
+
         println "Resuts:"
         println String.format("%10s %10s %10s", 'Expected', 'Got', 'Verdict')
 
