@@ -49,15 +49,16 @@ class Perceptron {
         def epochsPassed = study()
 
         println "Epochs passed: ${epochsPassed}"
+        println "Weights: ${weights}"
+        
         println "Resuts:"
         println String.format("%10s %10s %10s", 'Expected', 'Got', 'Verdict')
 
-        def expected = patterns.collect {it[-1]}
         patterns.each {
-            def e = it[-1]
-            def g = calculateExit(it[0..-2])
-            def v = g == e
-            println String.format("%10d %10d %10s", it[-1], calculateExit(it[0..-2]), v? "OK" : "NOT OK")
+            def expected = it[-1]
+            def got = calculateExit(it[0..-2])
+            def verdict = got == expected ? "OK" : "NOT OK"
+            println String.format("%10d %10d %10s", expected, got, verdict)
         }
     }
 
