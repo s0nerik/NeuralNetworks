@@ -1,4 +1,4 @@
-import groovy.json.JsonSlurper
+import javax.swing.JOptionPane
 
 class Perceptron {
 
@@ -6,7 +6,7 @@ class Perceptron {
     def statement = new File('input.txt').readLines().find {!it.startsWith("#")}
     def patterns = new StatementParser().generateTable(statement)
 
-    def studySpeed = 0.115
+    def learningRate = 0.115
     def enters = (0..<(patterns[0].size() - 1)).collect { 0.0 }
     def weights = enters.collect { Math.random() * 0.2 + 0.1 }
 
@@ -39,7 +39,7 @@ class Perceptron {
             def error = pattern[-1] - exit
             globalError += Math.abs(error)
             weights.eachWithIndex { weight, i ->
-                weights[i] += studySpeed * error * enters[i]
+                weights[i] += learningRate * error * enters[i]
             }
         }
 
@@ -47,6 +47,9 @@ class Perceptron {
     }
 
     def test() {
+        def learningRateString = JOptionPane.showInputDialog('Learning rate:')
+        if (learningRateString) learningRate = learningRateString?.toDouble()
+
         def epochsPassed = study()
 
         println "Epochs passed: ${epochsPassed}"
