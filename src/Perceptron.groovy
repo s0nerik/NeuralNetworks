@@ -10,7 +10,7 @@ class Perceptron {
     def enters = (0..<(patterns[0].size() - 1)).collect { 0.0 }
     def weights = enters.collect { Math.random() * 0.2 + 0.1 }
 
-    def MAX_EPOCHS = 100000
+    def MAX_EPOCHS = 10000
 
     def calculateExit(List<Integer> enters) {
         def exit = 0.0
