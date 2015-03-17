@@ -1,16 +1,24 @@
-import javax.swing.JOptionPane
-
 class Perceptron {
 
 //    def patterns = new JsonSlurper().parse(new File("input.json")).patterns
-    def statement = new File('input.txt').readLines().find {!it.startsWith("#")}
-    def patterns = new StatementParser().generateTable(statement)
+//    def statement = new File('input.txt').readLines().find {!it.startsWith("#")}
+//    def patterns = new StatementParser().generateTable(statement)
 
-    def learningRate = 0.115
+    List patterns
+
     def enters = (0..<(patterns[0].size() - 1)).collect { 0.0 }
     def weights = enters.collect { Math.random() * 0.2 + 0.1 }
 
-    def MAX_EPOCHS = 10000
+    def learningRate = 0.115
+    def maxEpochs = 10000
+    def hiddenLayers = 1
+
+    def Perceptron(def patterns, double learningRate, int maxEpochs, int hiddenLayers) {
+        this.patterns = patterns
+        this.learningRate = learningRate
+        this.maxEpochs = maxEpochs
+        this.hiddenLayers = hiddenLayers
+    }
 
     def calculateExit(List<Integer> enters) {
         def exit = 0.0
@@ -26,7 +34,7 @@ class Perceptron {
             def lastWeights = weights.clone()
             def epochError = studyEpoch()
             epochs++
-            if (lastWeights.equals(weights) || epochError == 0 || epochs > MAX_EPOCHS) break
+            if (lastWeights.equals(weights) || epochError == 0 || epochs > maxEpochs) break
         }
         epochs
     }
@@ -47,9 +55,6 @@ class Perceptron {
     }
 
     def test() {
-        def learningRateString = JOptionPane.showInputDialog('Learning rate:')
-        if (learningRateString) learningRate = learningRateString?.toDouble()
-
         def epochsPassed = study()
 
         println "Epochs passed: ${epochsPassed}"
@@ -58,16 +63,12 @@ class Perceptron {
         println "Resuts:"
         println String.format("%10s %10s %10s", 'Expected', 'Got', 'Verdict')
 
-        patterns.each {
+        patterns.each { List it ->
             def expected = it[-1]
             def got = calculateExit(it[0..-2])
             def verdict = got == expected ? "OK" : "NOT OK"
             println String.format("%10d %10d %10s", expected, got, verdict)
         }
-    }
-
-    static void main(String... args) {
-        new Perceptron().test()
     }
 
 }
