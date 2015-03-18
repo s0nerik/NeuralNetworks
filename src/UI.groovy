@@ -6,6 +6,8 @@ import org.jfree.chart.plot.PlotOrientation
 import org.jfree.data.category.DefaultCategoryDataset
 
 import javax.swing.*
+import javax.swing.filechooser.FileFilter
+import javax.swing.table.TableModel
 import java.awt.*
 import java.awt.event.ActionEvent
 
@@ -23,13 +25,9 @@ class UI {
     def inputsModel = new InputsModel()
 
     JPanel chartPanelContainer
+    TableModel inputTableModel
     JTable inputTable
-    JTable outputTable
-
-    def tableHeaders = ["x1", "x2", "x3", "x4", "x5", "x6", "y"]
-    def tableData = [
-            ["x1", "x2", "x3", "x4", "x5", "x6", "y"] * 5
-    ]
+    def inputTableData
 
     def chart
 
@@ -47,6 +45,27 @@ class UI {
         def options = [true, false, false]
         chart = ChartFactory.createLineChart(*labels, dataset, PlotOrientation.VERTICAL, *options)
         refreshChart()
+    }
+
+    def replaceInput() {
+//        inputTableData = Collections.nCopies(500, 11..17)
+//        inputTable.clear()
+        inputTableData.removeAll()
+
+//        inputTableModel.tableChanged
+//        fireTableDataChanged
+//
+//        inputTableModel
+//
+//        inputTableData.tableModel(list: model) {
+//            closureColumn(header: 'x1', read: { row -> return row[0] })
+//            closureColumn(header: 'x2', read: { row -> return row[1] })
+//            closureColumn(header: 'x3', read: { row -> return row[2] })
+//            closureColumn(header: 'x4', read: { row -> return row[3] })
+//            closureColumn(header: 'x5', read: { row -> return row[4] })
+//            closureColumn(header: 'x6', read: { row -> return row[5] })
+//            closureColumn(header: 'y', read: { row -> return row[6] })
+//        }
     }
 
     def init() {
@@ -97,6 +116,28 @@ class UI {
                                         })
                                 )
 
+                                button(preferredSize: new Dimension(128, 24), action: action(name: 'Load input', closure: {
+                                    def openCsvDialog = fileChooser(
+                                            dialogTitle: "Choose an excel file",
+                                            fileSelectionMode: JFileChooser.FILES_ONLY,
+                                            fileFilter: [getDescription: {-> "*.csv"}, accept:{file-> file ==~ /.*?\.csv/ || file.isDirectory() }] as FileFilter
+                                    )
+
+                                    switch(openCsvDialog.showOpenDialog()) {
+                                        case JFileChooser.APPROVE_OPTION:
+                                            File file = openCsvDialog.getSelectedFile();
+
+                                            def path = openCsvDialog.getCurrentDirectory().getAbsolutePath();
+                                            println "path="+path+"\nfile name="+file.toString();
+                                            break;
+                                        case JFileChooser.CANCEL_OPTION:
+                                        case JFileChooser.ERROR_OPTION:
+                                            break;
+                                    }
+
+                                    replaceInput()
+                                }))
+
                                 button(preferredSize: new Dimension(64, 24), action: action(name: 'Run', closure: {
                                     def statement = new File('input.txt').readLines().find { !it.startsWith("#") }
                                     def patterns = new StatementParser().generateTable(statement)
@@ -115,8 +156,8 @@ class UI {
                                     }
 
                                     replaceChart(data)
-//                                    println "basic"
                                 }))
+
                             }
                         }
                     }
@@ -128,15 +169,17 @@ class UI {
                             }
                         }
                         td {
-                            panel(id: 'canvas', preferredSize: new Dimension(500, 480)) {
+                            panel(preferredSize: new Dimension(500, 480)) {
 
                                 boxLayout(axis: BoxLayout.Y_AXIS)
                                 label text: "Input values"
                                 scrollPane() {
-                                    table() {
-                                        def model = Collections.nCopies(500, 1..7)
+                                    inputTable = table() {
+                                        inputTableData = Collections.nCopies(500, 1..7)
 
-                                        tableModel(list: model) {
+                                        inputTableModel = tableModel(list: inputTableData, tableChanged: {
+                                            println "Table changed"
+                                        }) {
                                             closureColumn(header: 'x1', read: { row -> return row[0] })
                                             closureColumn(header: 'x2', read: { row -> return row[1] })
                                             closureColumn(header: 'x3', read: { row -> return row[2] })
